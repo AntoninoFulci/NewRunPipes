@@ -4,11 +4,11 @@
 # Program options                                                              #
 ################################################################################
 #path to the fluka-cern executable and the custom exe
-fluka_path="/path/to/fluka"                         #con "/" all'inizio
-custom_exe="/path/to/exe"                           #con "/" all'inizio
+fluka_path="/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka4-3.0/bin/rfluka"                         # con "/" all'inizio
+custom_exe="/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka_custom_exes/dumping"                     # con "/" all'inizio
 
 #path to the python script that generates the runs
-pyscript="/Users/antoninofulci/FlukaWork/NewRunPipes/generate_run.py"
+pyscript="/mnt/project_mnt/jlab12/fiber7_fs/afulci/Simulations/generate_run.py"
 
 #wirte here the queue where to launch the jobs
 LSF_QUEUE="long"
@@ -84,7 +84,7 @@ Launch(){
     # Piccolo controllo prima di far partire lo script
     echo "The file chosen is: $file"
     echo "The number of job to launch is $job_number"
-    echo "The simulation will be saved in the new directory: $(pwd)/$directory" 
+    echo "The simulation will be saved in the new directory (be sure it does not already exits): $(pwd)/$directory" 
     echo "Is it correct? [y/n]"
     read response
 
