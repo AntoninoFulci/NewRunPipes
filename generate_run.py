@@ -49,16 +49,16 @@ def GenerateSh(input, iteration, fluka_path,  dump_to_root, custom_exe = "None")
     # scrittura nel file dei comando da usare
     sh.write("#!/usr/bin/env bash")                                         
     sh.write("\n\n")
-    sh.write("source /mnt/project_mnt/software_fs/gcc/4.8.4/x86_64-cc7/setup.sh\n")
-    sh.write("source /mnt/project_mnt/software_fs/root/6.18.00/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n")
-    sh.write("export TMPDIR=/mnt/project_mnt/jlab12/fiber7_fs/afulci/temp/\n")
     sh.write("export PATH=$PATH:/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka4-3.0/bin\n\n")
     sh.write(fluka_path + " -M 1 -e " + custom_exe + " " + input)           # creazione comando
     sh.write("\n\n")
-    sh.write("rm *.19 ran* *.out\n\n")
+    sh.write("rm *.19 ran* \n\n")
     # sh.write("mv *_dump.txt ./" + nome_dump)
     # sh.write("\n\n")
-    sh.write("root " + dump_to_root)
+    sh.write("source /mnt/project_mnt/software_fs/gcc/4.8.4/x86_64-cc7/setup.sh\n")
+    sh.write("source /mnt/project_mnt/software_fs/root/6.18.00/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n")
+    sh.write("export TMPDIR=/mnt/project_mnt/jlab12/fiber7_fs/afulci/temp/\n")
+    sh.write("root -b " + dump_to_root)
 
 
     sh.close()                                                              # chiusura del file
