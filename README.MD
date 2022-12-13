@@ -1,1 +1,2 @@
-File che permettono di lanciare le simulazioni sulla farm di genova
+# Simulation launch scripts
+Scripts che permettono di lanciare le simulazioni sulla farm di genova
