@@ -43,12 +43,22 @@ def GenerateSh(input, iteration, fluka_path, custom_exe = "None"):
 
     # generazione del job da lanciare
     nome = "job_" + str(iteration) + ".sh"                                  # crea il nome del file in base all'iterazione corrente
+    nome_dump = "dump"+"_{:04d}".format(iteration)+".txt"
     sh = open(nome, "w")                                                    # crea il file
 
     # scrittura nel file dei comando da usare
     sh.write("#!/usr/bin/env bash")                                         
     sh.write("\n\n")
-    sh.write(fluka_path + " -M 1 -e ." + custom_exe + " " + input)          # creazione comando
+    sh.write("export PATH=$PATH:/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka4-3.0/bin")
+    sh.write("\n\n")
+    sh.write(fluka_path + " -M 1 -e " + custom_exe + " " + input)           # creazione comando
+    sh.write("\n\n")
+    sh.write("rm *.19 ran* *.out")
+    sh.write("\n\n")                
+    sh.write("mv *_dump.txt ./" + nome_dump)
+    sh.write("\n\n")
+    sh.write("echo a questo punto lancio lo script che fa diventare il dump da txt in .root")
+
 
     sh.close()                                                              # chiusura del file
 
