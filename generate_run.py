@@ -37,7 +37,7 @@ def GenerateInput(input, iteration):
     return file_name                                                        #ritorna il nome del file per usarlo nell'altro metodo
 
 
-def GenerateSh(input, iteration, fluka_path, custom_exe = "None"):
+def GenerateSh(input, iteration, fluka_path,  dump_to_root, custom_exe = "None"):
     # genera il file sh che lancia il comando trovato sul sito: https://fluka.cern/documentation/running/fluka-command-line
     # /pathtofluka/bin/rfluka -M 5 -e ./myfluka example.inp
 
@@ -49,15 +49,16 @@ def GenerateSh(input, iteration, fluka_path, custom_exe = "None"):
     # scrittura nel file dei comando da usare
     sh.write("#!/usr/bin/env bash")                                         
     sh.write("\n\n")
-    sh.write("export PATH=$PATH:/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka4-3.0/bin")
-    sh.write("\n\n")
+    sh.write("source /mnt/project_mnt/software_fs/gcc/4.8.4/x86_64-cc7/setup.sh\n")
+    sh.write("source /mnt/project_mnt/software_fs/root/6.18.00/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n")
+    sh.write("export TMPDIR=/mnt/project_mnt/jlab12/fiber7_fs/afulci/temp/\n")
+    sh.write("export PATH=$PATH:/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka4-3.0/bin\n\n")
     sh.write(fluka_path + " -M 1 -e " + custom_exe + " " + input)           # creazione comando
     sh.write("\n\n")
-    sh.write("rm *.19 ran* *.out")
-    sh.write("\n\n")                
-    sh.write("mv *_dump.txt ./" + nome_dump)
-    sh.write("\n\n")
-    sh.write("echo a questo punto lancio lo script che fa diventare il dump da txt in .root")
+    sh.write("rm *.19 ran* *.out\n\n")
+    # sh.write("mv *_dump.txt ./" + nome_dump)
+    # sh.write("\n\n")
+    sh.write("root " + dump_to_root)
 
 
     sh.close()                                                              # chiusura del file
@@ -73,17 +74,19 @@ parser.add_argument('--input',      type=str, required=True, help="Input file na
 parser.add_argument('--iteration',  type=int, required=True, help='Current iteration')
 parser.add_argument('--fluka',      type=str, required=True, help='Path to the fluka-cern path')
 parser.add_argument('--custom_exe', type=str, required=True, help='Path to the custom exe')
+parser.add_argument('--dump_to_root', type=str, required=True, help='Path to the custom exe')
 args = parser.parse_args()
 
-INPUT_FILE  = args.input            #file name, stripped of the .inp
-C_ITERATION = args.iteration        #current iteration
-FLUKA_PATH  = args.fluka            #fluka-cern path
-CUSTOM_EXE  = args.custom_exe       #fluka custom exe
+INPUT_FILE  = args.input            # file name, stripped of the .inp
+C_ITERATION = args.iteration        # current iteration
+FLUKA_PATH  = args.fluka            # fluka-cern path
+CUSTOM_EXE  = args.custom_exe       # fluka custom exe
+DUMP_TO_ROOT = args.dump_to_root    # dump_to_root script path
 
 # Lanciamo prima la funzione per generare il nuovo file di input con un seed random
 NEW_INPUT = GenerateInput(INPUT_FILE, C_ITERATION)
 
 # Creiamo il file sh che verrà lanciato sulla farm come job
-GenerateSh(NEW_INPUT, C_ITERATION, FLUKA_PATH, CUSTOM_EXE)
+GenerateSh(NEW_INPUT, C_ITERATION, FLUKA_PATH, DUMP_TO_ROOT, CUSTOM_EXE)
 
 

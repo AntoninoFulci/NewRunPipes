@@ -10,6 +10,6 @@
                   63            SPHINUP             SPHOUTUP                   0                   8       1.0108850E+00       3.7296762E-01      -1.5801648E+02       2.1817768E+00       1.1291842E+01      -3.7191418E-01       1.5491612E-02      -2.3338824E-02      -9.9717551E-01       4.1536078E-02      -6.2576005E-02       1.0000000E+00       1.0000000E+00
                   85            SPHINUP             SPHOUTUP                   0                   8       1.0800583E+00       5.3267474E-01       5.1639149E+01       1.9891489E+02       5.5901325E+01       1.3225959E-01       5.1555551E-01      -2.1267154E-02       2.4829335E-01       9.6786176E-01      -3.9925216E-02       1.0000000E+00       1.0000000E+00
  #####
-   Average CPU time used to follow a primary particle:        2.6061785E-01     s
-  Total CPU time used to follow all primary particles:        2.6061785E+01     s
-                            Total number of primaries:                  100
+       2.6166884E-01   s -> Average CPU time used to follow a primary particle
+       2.6166884E+01   s -> Total CPU time used to follow all primary particles
+                 100     -> Total number of primaries

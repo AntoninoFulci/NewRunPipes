@@ -44,13 +44,13 @@
       OPEN ( UNIT = 99, FILE = FILNAM, STATUS = 'OLD', FORM =
      &          'FORMATTED' )
 
-114   FORMAT (A55,I20)
-115   FORMAT (A55,ES20.7,5X,A)
+114   FORMAT (I20,3X,A)
+115   FORMAT (ES20.7,3X,A)
 
       WRITE (99,*) "#####"
-      WRITE (99,115) "Average CPU time used to follow a primary particle: ", TPMEAN, "s"
-      WRITE (99,115) "Total CPU time used to follow all primary particles: ", TRNTOT, "s"
-      WRITE (99,114) "Total number of primaries: ", NCASE
+      WRITE (99,115) TPMEAN, "s -> Average CPU time used to follow a primary particle" 
+      WRITE (99,115) TRNTOT, "s -> Total CPU time used to follow all primary particles"
+      WRITE (99,114) NCASE,  "  -> Total number of primaries"
 
 
 

@@ -12,6 +12,10 @@ fluka_folder="/Users/antoninofulci/Fluka/fluka4-3.0"
 # pyscript="/mnt/project_mnt/jlab12/fiber7_fs/afulci/Simulations/generate_run.py"
 pyscript="/Users/antoninofulci/FlukaWork/NewRunPipes/generate_run.py"
 
+# path to the root script that generates the .root file at the end of a run
+#dump_to_root=""
+dump_to_root="/Users/antoninofulci/FlukaWork/NewRunPipes/dump_to_root.C"
+
 # write here the queue where to launch the jobs
 LSF_QUEUE="long"
 
@@ -178,7 +182,7 @@ Launch(){
         cp $FileAbsPath .
 
         # Script python che genera il file di input con un nuovo seed e il file .sh per avviare la simulazione
-        python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe 
+        python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe --dump_to_root=$dump_to_root
 
         # Lancia la simulazione
         echo bsub -P c7 -q $LSF_QUEUE -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
