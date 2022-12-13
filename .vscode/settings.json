@@ -1,3 +1,9 @@
 {
-    "fortran.fortls.disabled": true
+    "fortran.fortls.disabled": true,
+    "files.associations": {
+        "dump_to_root.C": "cpp",
+        "neutrini.C": "cpp",
+        "string": "cpp",
+        "string_view": "cpp"
+    }
 }

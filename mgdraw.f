@@ -141,7 +141,7 @@
       WRITE(IODRAW,121) NCASE, FL_InReg, FL_OutReg,
      &                  SURFID,JTRACK,ETRACK,PTRACK,
      &                  XSCO, YSCO, ZSCO,
-     &                  PTRACK*CXTRCK, PTRACK*CYTRCK, PTRACK*CZTRACK,
+     &                  PTRACK*CXTRCK, PTRACK*CYTRCK, PTRACK*CZTRCK,
      &                  CXTRCK, CYTRCK, CZTRCK,
      &                  WTRACK, WSCRNG
 

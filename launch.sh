@@ -27,7 +27,6 @@ version=1.1
 file=0
 job_number=0
 directory=0
-mgdraw=0
 verbose=false
 help=false
 Version=false
@@ -49,8 +48,7 @@ Help(){
    echo ""
    echo "Optional arguments"
    echo "d     Directory where to save the simulations run/s."
-   echo "m     Name of the mgdraw.f for scoring to be compiled and linked. The results will be saved in the simulation directory."
-   echo "s     Name of the source.f/source_newgen.f for custom source to be compiled and linked. The results will be saved in the simulation directory."
+   echo "r     Add here the name/s of the routines to compile and link."
    echo "v     Verbose mode."
    echo "h     Show this message."
    echo "V     Print software version and exit."
@@ -82,31 +80,43 @@ get_abs_filename() {
 MakeExe(){
 
     #Compiling
-    echo "Compiling the executables..."
-    if [ -f "$mgdrawAbs" ] 
+    if [ ${#routines[@]} -eq 0 ]
     then
-        echo "Compiling mgdraw.f..."
-        gfortran -c -I$fluka_folder/include -g -cpp -O3 -fd-lines-as-comments -Wall -Waggregate-return -Wcast-align -Wline-truncation -Wno-conversion -Wno-integer-division -Wno-tabs -Wno-unused-dummy-argument -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wsystem-headers -Wuninitialized -Wunused-label -mtune=generic -fPIC -fexpensive-optimizations -funroll-loops -fstrength-reduce -fno-automatic -finit-local-zero -ffixed-line-length-132 -fbackslash -funderscoring -frecord-marker=4 -falign-commons -fbacktrace -frange-check -fbounds-check -fdump-core -ftrapping-math -ffpe-trap=invalid,zero,overflow -o mgdraw.o $mgdrawAbs
-        mgdrawO="mgdraw.o"
+        echo "No routines to compile."
     else
-        echo "No mgdraw.f found. Skipping it"
+        echo "Compiling the routine/s..."
     fi
 
-    if [ -f "$sourceAbs" ] 
-    then
-        echo "Compiling source.f..."
-        gfortran -c -I$fluka_folder/include -g -cpp -O3 -fd-lines-as-comments -Wall -Waggregate-return -Wcast-align -Wline-truncation -Wno-conversion -Wno-integer-division -Wno-tabs -Wno-unused-dummy-argument -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wsystem-headers -Wuninitialized -Wunused-label -mtune=generic -fPIC -fexpensive-optimizations -funroll-loops -fstrength-reduce -fno-automatic -finit-local-zero -ffixed-line-length-132 -fbackslash -funderscoring -frecord-marker=4 -falign-commons -fbacktrace -frange-check -fbounds-check -fdump-core -ftrapping-math -ffpe-trap=invalid,zero,overflow -o source_newgen.o $sourceAbs
-        sourceO="source_newgen.o"
-    else
-        echo "No source_newgen.f found. Skipping it"
-    fi
-
+    for i in "${routines[@]}"
+    do
+    : 
+        if [ -f "$i" ] 
+        then
+            cd $directory
+            echo "Compiling $i..."
+            gfortran -c -I$fluka_folder/include -g -cpp -O3 -fd-lines-as-comments -Wall -Waggregate-return -Wcast-align -Wline-truncation -Wno-conversion -Wno-integer-division -Wno-tabs -Wno-unused-dummy-argument -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wsystem-headers -Wuninitialized -Wunused-label -mtune=generic -fPIC -fexpensive-optimizations -funroll-loops -fstrength-reduce -fno-automatic -finit-local-zero -ffixed-line-length-132 -fbackslash -funderscoring -frecord-marker=4 -falign-commons -fbacktrace -frange-check -fbounds-check -fdump-core -ftrapping-math -ffpe-trap=invalid,zero,overflow -o ${i%.*}.o ../$i
+            routinesO+="${i%.*}.o "
+            cd ..
+        else
+            echo "No $i found. Skipping it."
+        fi
+    done
+    
     #Linking
-    echo "Linking the executable..."
-    gfortran -o custom_exe -fuse-ld=bfd $mgdrawO $sourceO $fluka_folder/lib/interface/asciir.o $fluka_folder/lib/interface/dpmjex.o $fluka_folder/lib/interface/evdini.o $fluka_folder/lib/interface/eventd.o $fluka_folder/lib/interface/eveout.o $fluka_folder/lib/interface/eveqmd.o $fluka_folder/lib/interface/evqmdi.o $fluka_folder/lib/interface/glaubr.o $fluka_folder/lib/interface/idd2f.o $fluka_folder/lib/interface/idf2d.o $fluka_folder/lib/interface/rqm2pr.o $fluka_folder/lib/interface/rqmdex.o $fluka_folder/lib/interface/zrdpcm.o $fluka_folder/lib/interface/zrrqcm.o -L$fluka_folder/lib -lrqmd -lfluka -lstdc++ -lz -lDPMJET
+    if [ ${#routinesO[@]} -eq 0 ]
+    then
+        echo "No routines to link."
+    else
+        cd $directory
+        echo "Linking the routine/s..."
+        gfortran -o custom_exe -fuse-ld=bfd ${routinesO[@]} $fluka_folder/lib/interface/asciir.o $fluka_folder/lib/interface/dpmjex.o $fluka_folder/lib/interface/evdini.o $fluka_folder/lib/interface/eventd.o $fluka_folder/lib/interface/eveout.o $fluka_folder/lib/interface/eveqmd.o $fluka_folder/lib/interface/evqmdi.o $fluka_folder/lib/interface/glaubr.o $fluka_folder/lib/interface/idd2f.o $fluka_folder/lib/interface/idf2d.o $fluka_folder/lib/interface/rqm2pr.o $fluka_folder/lib/interface/rqmdex.o $fluka_folder/lib/interface/zrdpcm.o $fluka_folder/lib/interface/zrrqcm.o -L$fluka_folder/lib -lrqmd -lfluka -lstdc++ -lz -lDPMJET
 
-    custom_exe=$(get_abs_filename "custom_exe")
-    echo $custom_exe
+        custom_exe=$(get_abs_filename "custom_exe")
+        echo "Custom executable created: $custom_exe"
+        cd ..
+    fi
+
+
 }
 
 
@@ -123,7 +133,7 @@ Launch(){
     # Piccolo controllo prima di far partire lo script
     echo "The file chosen is: $file"
     echo "The number of job to launch is $job_number"
-    echo "The following files will be compiled and linked to the fluka exe (DPMJET), be sure they are in the current folder: $mgdraw $source"
+    echo "The following files will be compiled and linked to the fluka exe (DPMJET), be sure they are in the current folder: ${routines[@]}"
     echo "The simulation will be saved in the new directory (be sure it does not already exits): $(pwd)/$directory" 
     echo "Is it correct? [y/n]"
     read response
@@ -147,14 +157,14 @@ Launch(){
 
     # Ottiene il path assoluto del file di input
     FileAbsPath=$(get_abs_filename "$file")
-    mgdrawAbs=$(get_abs_filename "$mgdraw")
-    sourceAbs=$(get_abs_filename "$source")
 
     # Creala cartella che conterrà la simulazione e ci entra, se l'opzione -d è passata con un valore diverso da 0 allora la creerà con quel nome
     mkdir ./$directory
-    cd $directory
 
+    # crea gli eseguibili
     MakeExe
+
+    cd $directory
 
     # Cicla sul numero di job che si vuole lanciare
     for (( i = 0001; i <= $job_number; i++ )); do
@@ -187,14 +197,19 @@ Launch(){
 ################################################################################
 
 # Ottiene le opzioni dal terminale. Quelle con i ":" vogliono qualcosa, quelle con "," sono ad attivazione
-while getopts f:j:d:m:s:v,h,V,D flag
+unset -v routines
+while getopts f:j:d:r:v,h,V,D flag
 do
     case "${flag}" in
         f) file=${OPTARG};;
         j) job_number=${OPTARG};;
         d) directory=${OPTARG};;
-        m) mgdraw=${OPTARG};;
-        s) source=${OPTARG};;
+        r) routines=("$OPTARG")
+            until [[ $(eval "echo \${$OPTIND}") =~ ^-.* ]] || [ -z $(eval "echo \${$OPTIND}") ]; do
+                routines+=($(eval "echo \${$OPTIND}"))
+                OPTIND=$((OPTIND + 1))
+            done
+            ;;
         v) verbose=true;;
         h) help=true;;
         V) Version=true;;
