@@ -3,7 +3,7 @@
 source RunPipes/config.cfg
 
 # Versione script
-version=1.2
+version=1.3
 
 # Valori di default di sicurezza
 file=0
