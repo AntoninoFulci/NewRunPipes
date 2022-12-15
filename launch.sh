@@ -1,31 +1,9 @@
 #!/usr/bin/env bash
 
-################################################################################
-# Program options                                                              #
-################################################################################
-# path to the fluka-cern executable and the custom exe
-fluka_path="/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka4-3.0/bin/rfluka"                       # con "/" all'inizio, serve per lanciare la run
-# fluka_folder="/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka4-3.0"                              # con "/" all'inizio, serve per compilare e linkare le routine fortran
-fluka_folder="/Users/antoninofulci/Fluka/fluka4-3.0"                                                                    
-
-# path to the python script that generates the runs
-# pyscript="/mnt/project_mnt/jlab12/fiber7_fs/afulci/Simulations/generate_run.py"
-pyscript="/Users/antoninofulci/FlukaWork/NewRunPipes/generate_run.py"
-
-# path to the root script that generates the .root file at the end of a run
-#dump_to_root=""
-dump_to_root="/Users/antoninofulci/FlukaWork/NewRunPipes/dump_to_root.C"
-
-# write here the queue where to launch the jobs
-LSF_QUEUE="long"
-
-# some options
-Overwriting="n"         #Overwrite the file for each run: y/n
-ERR_FILE="err.txt"
-OUT_FILE="out.txt"
+source RunPipes/config.cfg
 
 # Versione script
-version=1.1
+version=1.2
 
 # Valori di default di sicurezza
 file=0
@@ -91,15 +69,23 @@ MakeExe(){
         echo "Compiling the routine/s..."
     fi
 
+    mkdir $directory/RunFiles
+
     for i in "${routines[@]}"
     do
     : 
         if [ -f "$i" ] 
         then
             cd $directory
+            cd RunFiles
             echo "Compiling $i..."
-            gfortran -c -I$fluka_folder/include -g -cpp -O3 -fd-lines-as-comments -Wall -Waggregate-return -Wcast-align -Wline-truncation -Wno-conversion -Wno-integer-division -Wno-tabs -Wno-unused-dummy-argument -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wsystem-headers -Wuninitialized -Wunused-label -mtune=generic -fPIC -fexpensive-optimizations -funroll-loops -fstrength-reduce -fno-automatic -finit-local-zero -ffixed-line-length-132 -fbackslash -funderscoring -frecord-marker=4 -falign-commons -fbacktrace -frange-check -fbounds-check -fdump-core -ftrapping-math -ffpe-trap=invalid,zero,overflow -o ${i%.*}.o ../$i
-            routinesO+="${i%.*}.o "
+
+            y=${i%.*}
+
+            gfortran -c -I$fluka_folder/include -g -cpp -O3 -fd-lines-as-comments -Wall -Waggregate-return -Wcast-align -Wline-truncation -Wno-conversion -Wno-integer-division -Wno-tabs -Wno-unused-dummy-argument -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wsystem-headers -Wuninitialized -Wunused-label -mtune=generic -fPIC -fexpensive-optimizations -funroll-loops -fstrength-reduce -fno-automatic -finit-local-zero -ffixed-line-length-132 -fbackslash -funderscoring -frecord-marker=4 -falign-commons -fbacktrace -frange-check -fbounds-check -fdump-core -ftrapping-math -ffpe-trap=invalid,zero,overflow -o ${y##*/}.o ../../$i
+            routinesO+="${y##*/}.o "
+
+            cd ..
             cd ..
         else
             echo "No $i found. Skipping it."
@@ -112,11 +98,15 @@ MakeExe(){
         echo "No routines to link."
     else
         cd $directory
+        cd RunFiles
+
         echo "Linking the routine/s..."
         gfortran -o custom_exe -fuse-ld=bfd ${routinesO[@]} $fluka_folder/lib/interface/asciir.o $fluka_folder/lib/interface/dpmjex.o $fluka_folder/lib/interface/evdini.o $fluka_folder/lib/interface/eventd.o $fluka_folder/lib/interface/eveout.o $fluka_folder/lib/interface/eveqmd.o $fluka_folder/lib/interface/evqmdi.o $fluka_folder/lib/interface/glaubr.o $fluka_folder/lib/interface/idd2f.o $fluka_folder/lib/interface/idf2d.o $fluka_folder/lib/interface/rqm2pr.o $fluka_folder/lib/interface/rqmdex.o $fluka_folder/lib/interface/zrdpcm.o $fluka_folder/lib/interface/zrrqcm.o -L$fluka_folder/lib -lrqmd -lfluka -lstdc++ -lz -lDPMJET
 
         custom_exe=$(get_abs_filename "custom_exe")
         echo "Custom executable created: $custom_exe"
+
+        cd ..
         cd ..
     fi
 
@@ -137,7 +127,7 @@ Launch(){
     # Piccolo controllo prima di far partire lo script
     echo "The file chosen is: $file"
     echo "The number of job to launch is $job_number"
-    echo "The following files will be compiled and linked to the fluka exe (DPMJET), be sure they are in the current folder: ${routines[@]}"
+    echo "The following files will be compiled and linked to the fluka exe (DPMJET): ${routines[@]}"
     echo "The simulation will be saved in the new directory (be sure it does not already exits): $(pwd)/$directory" 
     echo "Is it correct? [y/n]"
     read response
@@ -189,9 +179,18 @@ Launch(){
         # bsub -P c7 -q $LSF_QUEUE -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
 
         # Torna indietro in modo da poter rieseguire tutto da capo
-        cd ".."
+        cd ..
 
     done
+
+}
+
+Clean(){
+    
+    echo "Cleaning the folder..."
+    cd ..
+    mv $file $directory
+
 }
 
 ################################################################################
@@ -248,4 +247,5 @@ then
     Help
 else
     Launch
+    Clean
 fi

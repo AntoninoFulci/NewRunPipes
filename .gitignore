@@ -3,6 +3,8 @@
 /test.py
 /.gitignore
 /.vscode
+/config.cfg
+/RunPipes/config.cfg
 
 # Test files
 /TestRun_01001_dump.txt
@@ -10,6 +12,4 @@
 /prova.inp
 
 # Fortran routine
-/mgdraw.f
-/ftelos.f
-/source_newgen.f
+/FlukaUserRoutines

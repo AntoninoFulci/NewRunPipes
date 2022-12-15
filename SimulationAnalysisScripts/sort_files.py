@@ -1,6 +1,5 @@
 import os
 import shutil
-import subprocess
 
 #cartella all'interno della quale si trovano le cartelle job
 #basta mettere il file dove ci sono le cartelle job e fa tutto da solo
