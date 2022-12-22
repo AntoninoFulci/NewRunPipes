@@ -14,6 +14,10 @@ help=false
 Version=false
 Defa=false
 
+#colori
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 ################################################################################
 # Help                                                                         #
 ################################################################################
@@ -22,7 +26,7 @@ Help(){
    echo "This script launch a simulation on the farm."
    echo
    echo "Syntax:"
-   echo "./launch.sh -f <fluka_input_file>.input -j <number of job> [-d <simulation/directtory/path/>|-v|-V|-D]"
+   echo "./launch.sh -f <fluka_input_file>.input -j <number of job> [-d <simulation/directtory/path/>] [-v|-V|-D] [-r <path1/to/fluka/routines> <path2/to/fluka/routines> ...]"
    echo
    echo "Required arguments:"
    echo "f     Fluka input file (must ends in .inp)."
@@ -125,11 +129,12 @@ Launch(){
     fi
     
     # Piccolo controllo prima di far partire lo script
-    echo "The file chosen is: $file"
-    echo "The number of job to launch is $job_number"
-    echo "The following files will be compiled and linked to the fluka exe (DPMJET): ${routines[@]}"
-    echo "The simulation will be saved in the new directory (be sure it does not already exits): $(pwd)/$directory" 
-    echo "Is it correct? [y/n]"
+    echo -e "The file chosen is: ${RED}$file${NC}"
+    echo -e "The number of job to launch is ${RED}$job_number${NC}"
+    echo -e "The jobs will be launched in the following queue: ${RED}$queue${NC}"
+    echo -e "The following files will be compiled and linked to the fluka exe (DPMJET): ${RED}${routines[@]}${NC}"
+    echo -e "The simulation will be saved in the new directory (be sure it does not already exits): ${RED}$(pwd)/$directory${NC}" 
+    echo -e "Is it correct? [y/n]"
     read response
 
     if [ $response == "n" ]
@@ -175,7 +180,7 @@ Launch(){
         python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe --dump_to_root=$dump_to_root
 
         # Lancia la simulazione
-        echo bsub -P c7 -q $LSF_QUEUE -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
+        echo bsub -P c7 -q $queue -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
         # bsub -P c7 -q $LSF_QUEUE -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
 
         # Torna indietro in modo da poter rieseguire tutto da capo
@@ -201,12 +206,13 @@ Clean(){
 
 # Ottiene le opzioni dal terminale. Quelle con i ":" vogliono qualcosa, quelle con "," sono ad attivazione
 unset -v routines
-while getopts f:j:d:r:v,h,V,D flag
+while getopts f:j:d:q:r:v,h,V,D flag
 do
     case "${flag}" in
         f) file=${OPTARG};;
         j) job_number=${OPTARG};;
         d) directory=${OPTARG};;
+        q) queue=${OPTARG};;
         r) routines=("$OPTARG")
             until [[ $(eval "echo \${$OPTIND}") =~ ^-.* ]] || [ -z $(eval "echo \${$OPTIND}") ]; do
                 routines+=($(eval "echo \${$OPTIND}"))
@@ -219,6 +225,19 @@ do
         D) Defa=true;;
     esac
 done
+
+if [ $OPTIND -eq 1 ] 
+then 
+    echo "No options were passed."
+    echo
+    Help
+    exit 0
+fi
+
+if [ -z "$queue"  ]
+then
+    queue="$LSF_QUEUE"
+fi
 
 # Se l'opzione -D è passata al programma stampa a schermo i valori di default
 if [ $Defa == true ]
@@ -242,10 +261,17 @@ fi
 #Checking the correct usage of the script
 if [ "${file: -4}" != ".inp" -o $job_number -le 0 ]
 then
-    echo "Error!!!"
-    echo 
+    echo "Error. File does not end with .inp or the number of jobs to launch was set to 0."
+    echo
     Help
+    exit 0
 else
-    Launch
-    Clean
+    if [ -f "$file" ]
+    then
+        Launch
+        Clean
+    else
+        echo "File does not exits."
+        exit 0
+    fi
 fi

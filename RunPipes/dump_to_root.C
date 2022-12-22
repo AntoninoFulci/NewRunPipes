@@ -1,4 +1,5 @@
 #include <string>
+#include <TFile.h>
 
 // Funzione che scansiona la cartella alla ricerca di un file che finisce per "_dump.txt"
 string find_dump(const char *dirname="./", const char *ext="_dump.txt") {
