@@ -3,6 +3,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <ROOT/RDataFrame.hxx>
 #include <chrono>
 #include <ctime>
 
@@ -32,30 +33,20 @@ int Analisi::GetNEOT(){
 }
 
 //Get the number of surfaces used on the mgdraw.f file
-vector<int> Analisi::GetNSup(){
+vector<int> Analisi::GetNSup(std::string path){
   vector <int> surfaces;
-  TH1I *h_fluxID = new TH1I("","", 1000, 0, 1000);
 
-  InitializeAll();
-  Long64_t nentries = fChain->GetEntriesFast();
-  Long64_t nbytes = 0, nb = 0;
+  ROOT::EnableImplicitMT(10); // Tell ROOT you want to go parallel
+  ROOT::RDataFrame DF_SurfaceID("Events", path);
+  auto h_fluxID = DF_SurfaceID.Histo1D({"SurfaceID", "SurfaceID", 1000u, 0., 1000.}, "SurfaceID");
 
-  for (Long64_t jentry=0; jentry<nentries; jentry++) {
-    Long64_t ientry = LoadTree(jentry);
-    if (ientry < 0) break;
-    nb = fChain->GetEntry(jentry);   nbytes += nb;
-    h_fluxID->Fill(SurfaceID);
-
-  }
-
-  int buffer;
-  for(int i = 0; i<1000; i++){
-    buffer = h_fluxID->GetBinContent(i);
-    if(buffer != 0){
-      surfaces.push_back(i);
+  for(int i = 1; i<=h_fluxID->GetNbinsX(); i++){
+    if(h_fluxID->GetBinContent(i) != 0){
+      surfaces.push_back(h_fluxID->GetBinCenter(i));
     }
   }
 
+  ROOT::DisableImplicitMT();
   return surfaces;
 
 }
@@ -80,7 +71,7 @@ void Analisi::Process(const std::string option, const std::string path, const st
   GetTimeNow(); cout<<"Total number of electrons simulated: "<<nEOT<<endl;
 
   //Getting the surfaces
-  vector<int> surf = GetNSup();
+  vector<int> surf = GetNSup(path);
   GetTimeNow(); cout<<"Total number of surfaces found: "<<surf.size()<<endl;
   GetTimeNow(); cout<<"Surfaces found: "<<endl;
   for(auto i:surf){
@@ -89,7 +80,7 @@ void Analisi::Process(const std::string option, const std::string path, const st
   cout<<endl;
 
   GetTimeNow(); cout<<"Analyzing files..."<<endl;
-
+  InitializeAll();
   if(particle == "neutron"){
     AnalyzeNeutrons(nEOT, surf);
   }

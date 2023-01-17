@@ -85,7 +85,7 @@ public :
    virtual void     Setter(std::string option, std::string path);
    virtual void     DebugMode();
    virtual int      GetNEOT();
-   virtual vector<int>  GetNSup();
+   virtual vector<int>  GetNSup(std::string path);
    virtual void     AnalyzeNeutrons(int nEOT, vector<int> surf);
    virtual TChain*  CreateChain(std::string tree_name);
    virtual TTree*   GetTree(std::string tree_name);

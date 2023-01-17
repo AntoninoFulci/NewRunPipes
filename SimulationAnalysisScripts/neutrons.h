@@ -130,7 +130,6 @@ void Analisi::AnalyzeNeutrons(int nEOT, vector<int> surf){
 
   Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
-  cout<<nEOT<<endl;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     //***************************************************
     Long64_t ientry = LoadTree(jentry);
@@ -140,23 +139,19 @@ void Analisi::AnalyzeNeutrons(int nEOT, vector<int> surf){
     //***************************************************
 
     //Definizione peso per eot
-    peso_eot = Weight1*0.03326392857/nEOT; // /nEOT;
+    peso_eot = Weight1/nEOT; // /nEOT;
 
     //Neutron kin energy & momentum
     n_Ek = ETot - n_m;
     n_p = sqrt(pow(ETot,2.0)-pow(n_m, 2.0));
-
     //Current particle r from center
     // m_r =     sqrt(m_vx*m_vx + m_vy*m_vy);
     //Neutron momentum radius & theta
     // n_r_p =   sqrt(n_px*n_px + n_py*n_py + n_pz*n_pz);
     // n_th_p =  atan2(sqrt(n_px*n_px+n_py*n_py),n_pz) * 180 / M_PI;
-
     //Filling
     for(int i = 0; i<surf.size(); i++){
-      //neutrino e antinuetrino elettronico
-      //for the old simulation swhere flux_ID start from 0 purt surf[i]-1
-      if(SurfaceID == surf[i]-1 && (ParticleID == 8)){
+      if(SurfaceID == surf[i] && (ParticleID == 8)){
 
         if(surf[i]>100 && surf[i]<200){
           SptDistr[i]-> Fill(Vx, Vz, peso_eot);
@@ -223,7 +218,8 @@ void Analisi::AnalyzeNeutrons(int nEOT, vector<int> surf){
     c->cd(6);
     energy100MeV_11GeV[i]-> Draw("histe");
 
-    c->SaveAs(Form("Graphs/Surface_%d.pdf",surf[i]));
+    gStyle->SetImageScaling(3.);
+    c->SaveAs(Form("Graphs/Surface_%d.png",surf[i]));
 
     energy0_10KeV[i]     -> Write();
     energy10_100KeV[i]   -> Write();
