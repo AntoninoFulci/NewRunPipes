@@ -13,6 +13,7 @@ verbose=false
 help=false
 Version=false
 Defa=false
+CustomSourceDiff=false      #Flag da accendere in caso si voglia una sorgente diversa per ogni simulazione
 
 #colori
 RED='\033[0;31m'
@@ -26,7 +27,7 @@ Help(){
    echo "This script launch a simulation on the farm."
    echo
    echo "Syntax:"
-   echo "./launch.sh -f <fluka_input_file>.input -j <number of job> [-d <simulation/directtory/path/>] [-v|-V|-D] [-r <path1/to/fluka/routines> <path2/to/fluka/routines> ...]"
+   echo "./launch.sh -f <fluka_input_file>.inp -j <number of job> [-d <simulation/directtory/path/>] [-v|-V|-D] [-r <path1/to/fluka/routines> <path2/to/fluka/routines> ...]"
    echo
    echo "Required arguments:"
    echo "f     Fluka input file (must ends in .inp)."
@@ -176,8 +177,16 @@ Launch(){
         # Copia il file dentro la cartella
         cp $FileAbsPath .
 
-        # Script python che genera il file di input con un nuovo seed e il file .sh per avviare la simulazione
-        python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe --dump_to_root=$dump_to_root
+        if [ $CustomSourceDiff == true ]
+        then
+            cp $custom_exe .
+            custom_exe_in=$(get_abs_filename "custom_exe")
+            python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe_in --dump_to_root=$dump_to_root
+            # python3 $pysource --root_file=$distro --nevents=$n_events
+            python3.9 $pysource --root_file=$distro --nevents=$n_events
+        else
+            python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe --dump_to_root=$dump_to_root
+        fi
 
         # Lancia la simulazione
         echo bsub -P c7 -q $queue -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
@@ -206,7 +215,7 @@ Clean(){
 
 # Ottiene le opzioni dal terminale. Quelle con i ":" vogliono qualcosa, quelle con "," sono ad attivazione
 unset -v routines
-while getopts f:j:d:q:r:v,h,V,D flag
+while getopts f:j:d:q:r:v,h,V,D,C flag
 do
     case "${flag}" in
         f) file=${OPTARG};;
@@ -223,6 +232,7 @@ do
         h) help=true;;
         V) Version=true;;
         D) Defa=true;;
+        C) CustomSourceDiff=true;;
     esac
 done
 
