@@ -65,8 +65,10 @@ void dump_to_root(){
     std::ifstream file(dump_file);
 
     UInt_t NCase, SurfaceID, ParticleID, TotEvents;
+    UInt_t MParticleID, ProcessID;
     string RegionIn, RegionOut;
     Double_t ETot, P, Vx, Vy, Vz, Px, Py, Pz, Cx, Cy, Cz, Weight1, Weight2;
+    Double_t METot, MVx, MVy, MVz;
     Double_t AvgTime, TotTime;
     bool first = true;
     string inizio, fine, line;
@@ -79,6 +81,7 @@ void dump_to_root(){
     TTree *Events = new TTree("Events", "Events");
     TTree *RunSummary = new TTree("RunSummary", "RunSummary");
 
+    //Event information
     Events -> Branch("NCase", &NCase);
     Events -> Branch("ParticleID", &ParticleID);
     Events -> Branch("SurfaceID", &SurfaceID);
@@ -98,10 +101,20 @@ void dump_to_root(){
     Events -> Branch("Weight1", &Weight1);
     Events -> Branch("Weight2", &Weight2);
 
+    //Mother particle information
+    Events -> Branch("MParticleID", &MParticleID);
+    Events -> Branch("ProcessID", &ProcessID);
+    Events -> Branch("METot", &METot);
+    Events -> Branch("Vx", &MVx);
+    Events -> Branch("Vy", &MVy);
+    Events -> Branch("Vz", &MVz);
+
+    //Run summary information
     RunSummary -> Branch("AvgTime", &AvgTime);
     RunSummary -> Branch("TotTime", &TotTime);
     RunSummary -> Branch("TotEvents", &TotEvents);
 
+    //Retrieve information from txt file
     while(getline(file, line)){
         // cout<<line<<endl;
         if(first){
@@ -130,7 +143,7 @@ void dump_to_root(){
         }
         else{
             std::stringstream sstream(line);
-            sstream >> NCase >> RegionIn >> RegionOut >> SurfaceID >> ParticleID >> ETot >> P >> Vx >> Vy >> Vz >> Px >> Py >> Pz >> Cx >> Cy >> Cz >> Weight1 >> Weight2;
+            sstream >> NCase >> RegionIn >> RegionOut >> SurfaceID >> ParticleID >> ETot >> P >> Vx >> Vy >> Vz >> Px >> Py >> Pz >> Cx >> Cy >> Cz >> Weight1 >> Weight2 >> MParticleID >> ProcessID >> METot >> MVx >> MVy >> MVz;
             Events -> Fill();
         }
         

@@ -5,12 +5,12 @@
 /.vscode
 /config.cfg
 /RunPipes/config.cfg
+/RunPipes/NeutronAroundTheDump.root
 
 # Test files
 /TestRun_01001_dump.txt
 /TestRun_01001.root
 /prova.inp
-/NeutronAroundTheDump.root
 
 # Fortran routine
 /FlukaUserRoutines

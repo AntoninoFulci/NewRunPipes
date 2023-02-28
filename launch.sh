@@ -40,6 +40,7 @@ Help(){
    echo "h     Show this message."
    echo "V     Print software version and exit."
    echo "D     Print default variables values."
+   echo "C     Use a different text source file for each run (requires that you use a text file as a source using sourge_newgen.f"
    echo
 }
 
@@ -190,7 +191,7 @@ Launch(){
 
         # Lancia la simulazione
         echo bsub -P c7 -q $queue -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
-        # bsub -P c7 -q $LSF_QUEUE -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
+        # bsub -P c7 -q $queue -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
 
         # Torna indietro in modo da poter rieseguire tutto da capo
         cd ..
