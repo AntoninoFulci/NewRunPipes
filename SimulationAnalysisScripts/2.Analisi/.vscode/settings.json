@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "analysis.C": "cpp",
-        "test.C": "cpp",
-        "analysis_neutron.C": "cpp",
-        "multi_plot.C": "cpp",
-        "MuonAnalysis.C": "cpp"
-    }
-}
