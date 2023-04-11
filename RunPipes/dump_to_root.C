@@ -105,9 +105,9 @@ void dump_to_root(){
     Events -> Branch("MParticleID", &MParticleID);
     Events -> Branch("ProcessID", &ProcessID);
     Events -> Branch("METot", &METot);
-    Events -> Branch("Vx", &MVx);
-    Events -> Branch("Vy", &MVy);
-    Events -> Branch("Vz", &MVz);
+    Events -> Branch("MVx", &MVx);
+    Events -> Branch("MVy", &MVy);
+    Events -> Branch("MVz", &MVz);
 
     //Run summary information
     RunSummary -> Branch("AvgTime", &AvgTime);

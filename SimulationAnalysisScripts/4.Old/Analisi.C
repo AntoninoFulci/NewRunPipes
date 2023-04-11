@@ -10,7 +10,7 @@
 #include "util.h"
 #include "setter.h"
 #include "init.h"
-#include "neutrons.h"
+#include "neutrons2.h"
 
 //Get the number of electrons in the simulation
 int Analisi::GetNEOT(){

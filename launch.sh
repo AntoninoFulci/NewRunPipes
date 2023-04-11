@@ -286,3 +286,5 @@ else
         exit 0
     fi
 fi
+
+# Dopo che è stato lanciato tutto, mette in coda il job che fa lancia l'analisi
