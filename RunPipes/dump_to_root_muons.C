@@ -55,7 +55,7 @@ int TimeDiff(const string fine, const string inizio) {
 }
 
 // Macro principale
-void dump_to_root(){
+void dump_to_root_muons(){
 
     // Salva il nome in una stringa
     string dump_file = find_dump();
@@ -64,11 +64,9 @@ void dump_to_root(){
     // Apre il file
     std::ifstream file(dump_file);
 
-    UInt_t NCase, SurfaceID, ParticleID, TotEvents;
-    UInt_t MParticleID, ProcessID;
-    string RegionIn, RegionOut;
-    Double_t ETot, P, Vx, Vy, Vz, Px, Py, Pz, Cx, Cy, Cz, Weight1, Weight2;
-    Double_t METot, MVx, MVy, MVz;
+    UInt_t NCase, ICode, MotherID, MuonID,TotEvents;
+    Double_t M_ETot, M_P, M_Px, M_Py, M_Pz, M_Cx, M_Cy, M_Cz, M_Weight; //For the mother particle
+    Double_t MuonEKin, MuonP, MuonVx, MuonVy, MuonVz, MuonPx, MuonPy, MuonPz,  MuonCx, MuonCy, MuonCz, MuonWeight; //For the muon
     Double_t AvgTime, TotTime;
     bool first = true;
     string inizio, fine, line;
@@ -81,33 +79,35 @@ void dump_to_root(){
     TTree *Events = new TTree("Events", "Events");
     TTree *RunSummary = new TTree("RunSummary", "RunSummary");
 
-    //Event information
-    Events -> Branch("NCase", &NCase);
-    Events -> Branch("ParticleID", &ParticleID);
-    Events -> Branch("SurfaceID", &SurfaceID);
-    Events -> Branch("RegionIn", &RegionIn);
-    Events -> Branch("RegionOut", &RegionOut);
-    Events -> Branch("ETot", &ETot);
-    Events -> Branch("P", &P);
-    Events -> Branch("Vx", &Vx);
-    Events -> Branch("Vy", &Vy);
-    Events -> Branch("Vz", &Vz);
-    Events -> Branch("Px", &Px);
-    Events -> Branch("Py", &Py);
-    Events -> Branch("Pz", &Pz);
-    Events -> Branch("Cx", &Cx);
-    Events -> Branch("Cy", &Cy);
-    Events -> Branch("Cz", &Cz);
-    Events -> Branch("Weight1", &Weight1);
-    Events -> Branch("Weight2", &Weight2);
-
     //Mother particle information
-    Events -> Branch("MParticleID", &MParticleID);
-    Events -> Branch("ProcessID", &ProcessID);
-    Events -> Branch("METot", &METot);
-    Events -> Branch("MVx", &MVx);
-    Events -> Branch("MVy", &MVy);
-    Events -> Branch("MVz", &MVz);
+    Events -> Branch("NCase", &NCase);
+    Events -> Branch("ICode", &ICode);
+
+    Events -> Branch("MotherID", &MotherID);
+    Events -> Branch("M_ETot", &M_ETot);
+    Events -> Branch("M_P", &M_P);
+    Events -> Branch("M_Px", &M_Px);
+    Events -> Branch("M_Py", &M_Py);
+    Events -> Branch("M_Pz", &M_Pz);
+    Events -> Branch("M_Cx", &M_Cx);
+    Events -> Branch("M_Cy", &M_Cy);
+    Events -> Branch("M_Cz", &M_Cz);
+    Events -> Branch("M_Weight", &M_Weight);
+
+    //Muon information
+    Events -> Branch("MuonID", &MuonID);
+    Events -> Branch("MuonEKin", &MuonEKin);
+    Events -> Branch("MuonP", &MuonP);
+    Events -> Branch("MuonVx", &MuonVx);
+    Events -> Branch("MuonVy", &MuonVy);
+    Events -> Branch("MuonVz", &MuonVz);
+    Events -> Branch("MuonPx", &MuonPx);
+    Events -> Branch("MuonPy", &MuonPy);
+    Events -> Branch("MuonPz", &MuonPz);    
+    Events -> Branch("MuonCx", &MuonCx);
+    Events -> Branch("MuonCy", &MuonCy);
+    Events -> Branch("MuonCz", &MuonCz);
+    Events -> Branch("MuonWeight", &MuonWeight);
 
     //Run summary information
     RunSummary -> Branch("AvgTime", &AvgTime);
@@ -115,6 +115,8 @@ void dump_to_root(){
     RunSummary -> Branch("TotEvents", &TotEvents);
 
     //Retrieve information from txt file
+    ofstream myfile {"test.txt"};
+
     while(getline(file, line)){
         // cout<<line<<endl;
         if(first){
@@ -144,11 +146,13 @@ void dump_to_root(){
         }
         else{
             std::stringstream sstream(line);
-            sstream >> NCase >> RegionIn >> RegionOut >> SurfaceID >> ParticleID >> ETot >> P >> Vx >> Vy >> Vz >> Px >> Py >> Pz >> Cx >> Cy >> Cz >> Weight1 >> Weight2 >> MParticleID >> ProcessID >> METot >> MVx >> MVy >> MVz;
+            sstream >>  NCase >>  ICode >>  MotherID >> M_ETot >> M_P >> M_Px >> M_Py >> M_Pz >> M_Cx >> M_Cy >> M_Cz >> M_Weight >> MuonID >> MuonEKin >> MuonP >> MuonVx >> MuonVy >> MuonVz >> MuonPx >> MuonPy >> MuonPz >> MuonCx >> MuonCy >> MuonCz >> MuonWeight;
+            myfile << NCase << "\t" <<ICode << "\t" <<MotherID << "\t" <<M_ETot << "\t" <<M_P << "\t" <<M_Px << "\t" <<M_Py << "\t" <<M_Pz << "\t" <<M_Cx << "\t" <<M_Cy << "\t" <<M_Cz << "\t" <<M_Weight << "\t" <<MuonID << "\t" <<MuonEKin << "\t" <<MuonP << "\t" <<MuonVx << "\t" <<MuonVy << "\t" <<MuonVz << "\t" <<MuonPx << "\t" <<MuonPy << "\t" <<MuonPz << "\t" <<MuonCx << "\t" <<MuonCy << "\t" <<MuonCz << "\t" <<MuonWeight << endl;
             Events -> Fill();
         }
         
-    }
+    } 
+    myfile.close();
 
 
 

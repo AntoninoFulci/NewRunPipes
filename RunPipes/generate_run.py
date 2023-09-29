@@ -49,18 +49,15 @@ def GenerateSh(input, iteration, fluka_path,  dump_to_root, custom_exe = "None")
     # scrittura nel file dei comando da usare
     sh.write("#!/usr/bin/env bash")                                         
     sh.write("\n\n")
-    sh.write("export PATH=$PATH:/mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/FLUKA_CERN/fluka4-3.0/bin\n\n")
-    # sh.write()  #Qui scrive sul file di riepilogo il numero del job, e il tempo di partenza
+    sh.write("export PATH=$PATH:" + fluka_path[:-5] + "\n\n")
     sh.write(fluka_path + " -M 1 -e " + custom_exe + " " + input)           # creazione comando
     sh.write("\n\n")
-    sh.write("rm *.19 ran* \n\n")
-    # sh.write("source /mnt/project_mnt/software_fs/gcc/4.8.4/x86_64-cc7/setup.sh\n")
+    sh.write("source /mnt/project_mnt/software_fs/gcc/12.2.1/x86_64-centos7/setup.sh\n")
     sh.write("source /mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/root-6.28.00/bin/thisroot.sh\n")
     sh.write("export TMPDIR=/mnt/project_mnt/jlab12/fiber7_fs/afulci/temp/\n\n")
     sh.write('echo "Converting the dump.txt file to a .root file"\n\n')
-    sh.write("root -b -q -l " + dump_to_root + "\n\n")
-    sh.write('echo "Cleaning the folder..."\n\n')
-    sh.write("rm *.out")
+    sh.write("root -b -q -l " + dump_to_root)
+    # sh.write("\nrm *.out *.inp *.err *.log *.19 *.txt ran*\n")
 
 
     sh.close()                                                              # chiusura del file
