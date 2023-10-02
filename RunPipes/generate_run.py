@@ -54,10 +54,11 @@ def GenerateSh(input, iteration, fluka_path,  dump_to_root, custom_exe = "None")
     sh.write("\n\n")
     sh.write("source /mnt/project_mnt/software_fs/gcc/12.2.1/x86_64-centos7/setup.sh\n")
     sh.write("source /mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/root-6.28.00/bin/thisroot.sh\n")
+    sh.write("source /mnt/project_mnt/jlab12/fiber7_fs/afulci/Programs/python_env/bin/activate\n")
     sh.write("export TMPDIR=/mnt/project_mnt/jlab12/fiber7_fs/afulci/temp/\n\n")
     sh.write('echo "Converting the dump.txt file to a .root file"\n\n')
-    sh.write("root -b -q -l " + dump_to_root)
-    # sh.write("\nrm *.out *.inp *.err *.log *.19 *.txt ran*\n")
+    sh.write("python3" + dump_to_root)
+    sh.write("\nrm *.out *.inp *.err *.log *.19 *.txt ran*\n")
 
 
     sh.close()                                                              # chiusura del file
