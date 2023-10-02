@@ -125,10 +125,17 @@ Launch(){
     # Strippa il nome del file di input
     StrippedName=${file%.*}
 
-    if [ $directory == 0 ]
-    then
-        directory=$StrippedName
-    fi
+    #Creiamo la cartella, nel caso in cui esiste già gli diamo un suffisso
+    base_directory_name=$StrippedName
+    new_directory_name="${base_directory_name}"
+
+    counter=1
+    while [ -e "${new_directory_name}" ]; do
+        new_directory_name="${base_directory_name}_${counter}"
+        counter=$((counter + 1))
+    done
+
+    directory=$new_directory_name
     
     # Piccolo controllo prima di far partire lo script
     echo -e "The file chosen is: ${RED}$file${NC}"
@@ -178,20 +185,11 @@ Launch(){
         # Copia il file dentro la cartella
         cp $FileAbsPath .
 
-        if [ $CustomSourceDiff == true ]
-        then
-            cp $custom_exe .
-            custom_exe_in=$(get_abs_filename "custom_exe")
-            python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe_in --dump_to_root=$dump_to_root
-            # python3 $pysource --root_file=$distro --nevents=$n_events
-            python3.9 $pysource --root_file=$distro --nevents=$n_events
-        else
-            python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe --dump_to_root=$dump_to_root
-        fi
+        python3 $pyscript --input=$StrippedName --iteration=$i --fluka=$fluka_path --custom_exe=$custom_exe --dump_to_root=$dump_to_root
 
         # Lancia la simulazione
-        echo bsub -P c7 -q $queue -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
-        # bsub -P c7 -q $queue -M 8192 -R "select[mem>8192] rusage[mem=8192]" $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
+        echo bsub -P c7 -q $queue $MEMORY $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
+        # bsub -P c7 -q $queue $MEMORY $err_opt $ERR_FILE $out_opt $OUT_FILE ./job_$i.sh
 
         # Torna indietro in modo da poter rieseguire tutto da capo
         cd ..
@@ -216,7 +214,7 @@ Clean(){
 
 # Ottiene le opzioni dal terminale. Quelle con i ":" vogliono qualcosa, quelle con "," sono ad attivazione
 unset -v routines
-while getopts f:j:d:q:r:v,h,V,D,C flag
+while getopts f:j:d:q:r:v,h,V,D flag
 do
     case "${flag}" in
         f) file=${OPTARG};;
@@ -233,7 +231,6 @@ do
         h) help=true;;
         V) Version=true;;
         D) Defa=true;;
-        C) CustomSourceDiff=true;;
     esac
 done
 
@@ -286,5 +283,3 @@ else
         exit 0
     fi
 fi
-
-# Dopo che è stato lanciato tutto, mette in coda il job che fa lancia l'analisi
